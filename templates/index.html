@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PDF Toolbox</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>PDF Toolbox</h1>
+
+    <!-- Reverse PDF -->
+    <form action="/reverse" method="post" enctype="multipart/form-data">
+      <input type="file" name="pdf_file" required>
+      <button type="submit" data-icon="📄">Reverse PDF Pages</button>
+    </form>
+
+    <!-- Delete Last 2 Pages -->
+    <form action="/delete_last_2" method="post" enctype="multipart/form-data">
+      <input type="file" name="pdf_file" required>
+      <button type="submit" data-icon="❌">Delete Last 2 Pages</button>
+    </form>
+
+    <!-- Add Image at Start -->
+    <form action="/add_images" method="post" enctype="multipart/form-data">
+      <input type="file" name="pdf_file" required>
+      <input type="file" name="images" required>
+      <input type="hidden" name="location" value="start">
+      <button type="submit" data-icon="🖼">Add Image at Start</button>
+    </form>
+
+    <!-- Merge PDFs -->
+    <form action="/merge" method="post" enctype="multipart/form-data">
+      <input type="file" name="pdf_files" multiple required>
+      <button type="submit" data-icon="📑">Merge Multiple PDFs</button>
+    </form>
+
+    <!-- Delete N Pages -->
+    <form action="/delete_n" method="post" enctype="multipart/form-data">
+      <input type="file" name="pdf_file" required>
+      <input type="number" name="n" placeholder="Number of pages" required>
+      <select name="location">
+        <option value="start">Start</option>
+        <option value="end">End</option>
+      </select>
+      <button type="submit" data-icon="🗑">Delete N Pages (Start/End)</button>
+    </form>
+
+    <!-- Add N Images -->
+    <form action="/add_images" method="post" enctype="multipart/form-data">
+      <input type="file" name="pdf_file" required>
+      <input type="file" name="images" multiple required>
+      <select name="location">
+        <option value="start">Start</option>
+        <option value="end">End</option>
+      </select>
+      <button type="submit" data-icon="➕">Add N Images (Start/End)</button>
+    </form>
+
+    <footer>Created by You 🔒</footer>
+  </div>
+</body>
+</html>
