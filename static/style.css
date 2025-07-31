@@ -1,63 +1,98 @@
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background-color: "red";
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
   margin: 0;
-  padding: 0;
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: bottom;
-  margin-top: 60px;
+  padding: 20px;
 }
 
 h1 {
-  font-size: 28px;
-  margin-bottom: 40px;
-  color: #111;
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
 }
 
 form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 20px;
+  background: #ffffff;
+  padding: 20px;
+  margin-bottom: 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+form h3 {
+  margin-top: 0;
+  color: #007bff;
+}
+
+input[type="file"],
+input[type="text"],
+select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
 }
 
 button {
-  width: 250px;
-  padding: 10px;
-  margin: 5px 0;
-  font-size: 15px;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
-  box-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-  transition: all 0.2s;
-  text-align: left;
+  font-size: 14px;
 }
 
 button:hover {
-  background-color: #f0f0f0;
+  background-color: #0056b3;
 }
 
-button::before {
-  content: attr(data-icon);
-  margin-right: 10px;
+label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 6px;
 }
 
-input, select {
+hr {
+  margin-top: 30px;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+
+footer{
+color:gray;
+text-align: Center;
+margin:5px;
+}
+#file-list {
+  list-style-type: none;
+  padding: 0;
   margin-top: 10px;
-  padding: 8px;
-  width: 230px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
 }
-
-footer {
-  margin-top: 50px;
-  font-size: 12px;
-  color: #666;
+#file-list {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 10px;
+}
+#file-list li {
+  padding: 8px 12px;
+  background: #f2f2f2;
+  margin-bottom: 6px;
+  border: 1px solid #ccc;
+  cursor: move;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#file-list li button {
+  background: red;
+  color: white;
+  border: none;
+  padding: 3px 8px;
+  cursor: pointer;
 }

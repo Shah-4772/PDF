@@ -6,58 +6,196 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <div class="container">
-    <h1>PDF Toolbox</h1>
+  <h1>📦 PDF Toolbox WebApp</h1>
 
-    <!-- Reverse PDF -->
-    <form action="/reverse" method="post" enctype="multipart/form-data">
-      <input type="file" name="pdf_file" required>
-      <button type="submit" data-icon="📄">Reverse PDF Pages</button>
-    </form>
 
-    <!-- Delete Last 2 Pages -->
-    <form action="/delete_last_2" method="post" enctype="multipart/form-data">
-      <input type="file" name="pdf_file" required>
-      <button type="submit" data-icon="❌">Delete Last 2 Pages</button>
-    </form>
+<!-- Convert Images to PDF -->
+<form action="/images_to_pdf" method="post" enctype="multipart/form-data">
+  <h3>🖼 Convert Images to PDF</h3>
+  <label>Select image files:</label>
+  <input type="file" name="images" accept=".jpg,.jpeg,.png" multiple required><br><br>
+  <button type="submit">Convert to PDF</button>
+</form>
 
-    <!-- Add Image at Start -->
-    <form action="/add_images" method="post" enctype="multipart/form-data">
-      <input type="file" name="pdf_file" required>
-      <input type="file" name="images" required>
-      <input type="hidden" name="location" value="start">
-      <button type="submit" data-icon="🖼">Add Image at Start</button>
-    </form>
 
-    <!-- Merge PDFs -->
-    <form action="/merge" method="post" enctype="multipart/form-data">
-      <input type="file" name="pdf_files" multiple required>
-      <button type="submit" data-icon="📑">Merge Multiple PDFs</button>
-    </form>
+  <!-- Reverse PDF -->
+<form action="/reverse" method="post" enctype="multipart/form-data">
+  <h3>🔁 Reverse PDF</h3>
+  <label>Select a PDF file:</label>
+  <input type="file" name="pdf_file" accept=".pdf" required>
+  <button type="submit">Reverse</button>
+</form>
 
-    <!-- Delete N Pages -->
-    <form action="/delete_n" method="post" enctype="multipart/form-data">
-      <input type="file" name="pdf_file" required>
-      <input type="number" name="n" placeholder="Number of pages" required>
-      <select name="location">
-        <option value="start">Start</option>
-        <option value="end">End</option>
-      </select>
-      <button type="submit" data-icon="🗑">Delete N Pages (Start/End)</button>
-    </form>
+<!-- Merge PDFs -->
+<form id="merge-form" action="/merge" method="post" enctype="multipart/form-data">
+  <h3>📎 Merge PDFs (Reorder / Add / Remove)</h3>
 
-    <!-- Add N Images -->
-    <form action="/add_images" method="post" enctype="multipart/form-data">
-      <input type="file" name="pdf_file" required>
-      <input type="file" name="images" multiple required>
-      <select name="location">
-        <option value="start">Start</option>
-        <option value="end">End</option>
-      </select>
-      <button type="submit" data-icon="➕">Add N Images (Start/End)</button>
-    </form>
+  <input type="file" id="merge-files" accept=".pdf" multiple>
+  <button type="button" onclick="addFiles()">➕ Add PDFs</button>
+  <ul id="file-list"></ul>
 
-    <footer>Created by You 🔒</footer>
-  </div>
+  <button type="submit">📥 Merge Selected PDFs</button>
+</form>
+
+<script>
+  const input = document.getElementById('merge-files');
+  const list = document.getElementById('file-list');
+  let fileArray = [];
+
+  // Adds selected files to the list
+  function addFiles() {
+    const files = Array.from(input.files);
+    files.forEach(file => {
+      if (!fileArray.find(f => f.name === file.name && f.size === file.size)) {
+        fileArray.push(file);
+      }
+    });
+    input.value = ''; // Clear file input so same file can be added again if needed
+    renderList();
+  }
+
+  // Renders the file list with drag and remove options
+  function renderList() {
+    list.innerHTML = '';
+    fileArray.forEach((file, index) => {
+      const li = document.createElement('li');
+      li.textContent = file.name;
+      li.setAttribute('draggable', 'true');
+      li.dataset.index = index;
+
+      // Remove button
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = '❌';
+      removeBtn.style.float = 'right';
+      removeBtn.onclick = () => {
+        fileArray.splice(index, 1);
+        renderList();
+      };
+
+      // Drag-and-drop
+      li.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', index);
+      });
+      li.addEventListener('dragover', e => {
+        e.preventDefault();
+        li.style.backgroundColor = '#f0f0f0';
+      });
+      li.addEventListener('dragleave', () => {
+        li.style.backgroundColor = '';
+      });
+      li.addEventListener('drop', e => {
+        e.preventDefault();
+        const from = parseInt(e.dataTransfer.getData('text/plain'));
+        const to = parseInt(li.dataset.index);
+        const temp = fileArray[from];
+        fileArray[from] = fileArray[to];
+        fileArray[to] = temp;
+        renderList();
+      });
+
+      li.appendChild(removeBtn);
+      list.appendChild(li);
+    });
+  }
+
+  // Submit the form with reordered files
+  document.getElementById('merge-form').addEventListener('submit', e => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    fileArray.forEach(file => formData.append('pdf_files', file));
+
+    fetch('/merge', {
+      method: 'POST',
+      body: formData
+    }).then(res => res.blob())
+      .then(blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'merged.pdf';
+        a.click();
+      });
+  });
+</script>
+
+
+
+<!-- Delete N Pages -->
+<form action="/delete_n" method="post" enctype="multipart/form-data">
+  <h3>🧹 Delete N Pages from Start or End</h3>
+  <label>Select a PDF file:</label>
+  <input type="file" name="pdf_file" accept=".pdf" required>
+  <label>Number of pages to delete:</label>
+  <input type="text" name="n" required>
+  <label>Delete from:</label>
+  <select name="location">
+    <option value="start">Start</option>
+    <option value="end">End</option>
+  </select>
+  <button type="submit">Delete</button>
+</form>
+
+<!-- Add N Images -->
+<form action="/add_images" method="post" enctype="multipart/form-data">
+  <h3>🖼 Add Images at Start or End</h3>
+  <label>Select a PDF file:</label>
+  <input type="file" name="pdf_file" accept=".pdf" required>
+  <label>Select images (JPG, PNG):</label>
+  <input type="file" name="images" accept=".jpg,.jpeg,.png" multiple required>
+  <label>Insert at:</label>
+  <select name="location">
+    <option value="start">Start</option>
+    <option value="end">End</option>
+  </select>
+  <button type="submit">Add Images</button>
+</form>
+
+<!-- Delete Specific or Range of Pages -->
+<form action="/delete_specific" method="post" enctype="multipart/form-data">
+  <h3>🗑 Delete Specific Pages (e.g. 2,4,6-8)</h3>
+  <label>Select a PDF file:</label>
+  <input type="file" name="pdf_file" accept=".pdf" required>
+  <label>Specific pages you want to delete:</label>
+  <input type="text" name="pages" placeholder="e.g. 2,4,6-8" required>
+  <button type="submit">Delete Pages</button>
+</form>
+
+<!-- Insert Images at Specific Positions -->
+<form action="/insert_images" method="post" enctype="multipart/form-data">
+  <h3>🧷 Insert Images at Specific PDF Pages</h3>
+  <label>Select base PDF:</label>
+  <input type="file" name="base_pdf" accept=".pdf" required>
+  <label>Select images (JPG, PNG):</label>
+  <input type="file" name="images" accept=".jpg,.jpeg,.png" multiple required>
+  <label>Insert at positions (e.g. 2,4,6-7):</label>
+  <input type="text" name="positions" placeholder="e.g. 2,4,6-7" required>
+  <button type="submit">Insert Images</button>
+</form>
+
+<!-- Split PDF at Specific Pages -->
+<form action="/split_pdf" method="post" enctype="multipart/form-data">
+  <h3>✂️ Split PDF at Specific Pages</h3>
+  <label>Select a PDF file to split:</label>
+  <input type="file" name="pdf_file" accept=".pdf" required>
+  <small>📄 Example: Upload a 20-page PDF</small><br><br>
+
+  <label>Enter split points (page numbers):</label>
+  <input type="text" name="split_points" placeholder="e.g. 5,12" required>
+  <small>✏️ This will split your PDF into parts: 1–4, 5–11, 12–end</small><br><br>
+
+  <button type="submit">Split PDF</button>
+</form>
+
+ <!--Convert PDF to Images-->
+<form action="/pdf_to_images" method="post" enctype="multipart/form-data">
+  <h3>🖼 Convert PDF Pages to Images</h3>
+  <label>Select a PDF file:</label>
+  <input type="file" name="pdf_file" accept=".pdf" required><br><br>
+  <button type="submit">Convert to Images</button>
+</form>
+
+<footer>Created by Shahajade </footer>
+<br>
+<footer>@2025-26</footer>
 </body>
 </html>
